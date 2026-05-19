@@ -345,8 +345,15 @@ async function submitForm(e) {
   document.getElementById('sending-overlay').classList.add('active');
   document.getElementById('btn-submit').disabled = true;
 
-  // Collect data
-  const sigDataURL = document.getElementById('sig-canvas').toDataURL('image/png');
+  // Collect data — handtekening gecomprimeerd
+  const sigCanvas = document.getElementById('sig-canvas');
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = 400; tmpCanvas.height = 120;
+  const tmpCtx = tmpCanvas.getContext('2d');
+  tmpCtx.fillStyle = '#ffffff';
+  tmpCtx.fillRect(0, 0, 400, 120);
+  tmpCtx.drawImage(sigCanvas, 0, 0, 400, 120);
+  const sigDataURL = tmpCanvas.toDataURL('image/jpeg', 0.5);
   const payload = {
     'access_key': '3a24cd08-4f08-41d8-8587-7da66c367e39',
     'Naam deelnemer': document.getElementById('naam').value,
@@ -359,8 +366,7 @@ async function submitForm(e) {
     'Toestemming audio-opname': document.getElementById('cb2').checked ? 'Ja ✓' : 'Nee',
     'Begrepen: naam niet in scriptie': document.getElementById('cb3').checked ? 'Ja ✓' : 'Nee',
     'Toestemming gebruik antwoorden': document.getElementById('cb4').checked ? 'Ja ✓' : 'Nee',
-    'Handtekening (base64 PNG)': sigDataURL,
-    
+    'Handtekening (base64 JPEG)': sigDataURL,
     '_subject': 'Toestemmingsformulier ingevuld – ' + document.getElementById('naam').value,
   };
 
@@ -370,7 +376,8 @@ async function submitForm(e) {
       headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: JSON.stringify(payload)
     });
-    if (res.ok) {
+    const data = await res.json();
+    if (res.ok && data.success) {
       document.getElementById('consent-form').style.display = 'none';
       document.getElementById('sending-overlay').classList.remove('active');
       const banner = document.getElementById('success-banner');
@@ -379,12 +386,12 @@ async function submitForm(e) {
       document.getElementById('progress-fill').style.width = '100%';
       document.getElementById('progress-label').textContent = 'Voortgang: 100% – Verzonden ✓';
     } else {
-      throw new Error('Server error');
+      throw new Error(data.message || 'Server error');
     }
   } catch(err) {
     document.getElementById('sending-overlay').classList.remove('active');
     document.getElementById('btn-submit').disabled = false;
-    alert('Er ging iets mis bij het verzenden. Controleer je internetverbinding en probeer opnieuw.');
+    alert('Fout bij verzenden: ' + err.message);
   }
 }
 document.getElementById('consent-form').addEventListener('submit', submitForm);
