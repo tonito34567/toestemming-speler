@@ -306,28 +306,6 @@ async function submitForm(e) {
     document.getElementById('err-datum').classList.toggle('visible', !ok);
     if (!ok) valid = false;
   }
-  {
-    const el = document.getElementById('positie');
-    const ok = el.value.trim() !== '';
-    el.classList.toggle('invalid', !ok);
-    document.getElementById('err-positie').classList.toggle('visible', !ok);
-    if (!ok) valid = false;
-  }
-  {
-    const el = document.getElementById('club');
-    const ok = el.value.trim() !== '';
-    el.classList.toggle('invalid', !ok);
-    document.getElementById('err-club').classList.toggle('visible', !ok);
-    if (!ok) valid = false;
-  }
-  {
-    const el = document.getElementById('speler');
-    const ok = el.value.trim() !== '';
-    el.classList.toggle('invalid', !ok);
-    document.getElementById('err-speler').classList.toggle('visible', !ok);
-    if (!ok) valid = false;
-  }
-
   // Validate required checkboxes
   const allCbs = ["cb1","cb2","cb3","cb4"].every(id => document.getElementById(id).checked);
   document.getElementById('err-cb').classList.toggle('visible', !allCbs);
