@@ -74,6 +74,8 @@
   @media print { .action-bar, button, .sig-actions, .progress-wrap, .sending-overlay { display: none !important; } body { background: white; } .form-section { border: 1px solid #ccc; } }
   @media (max-width: 520px) { .row-2 { grid-template-columns: 1fr; } .doc-header h1 { font-size: 19px; } .form-section { padding: 18px 16px; } }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("UrMAT8MsXIjZjxCxU");</script>
 </head>
 <body>
 <div class="sending-overlay" id="sending-overlay">
@@ -355,7 +357,6 @@ async function submitForm(e) {
   tmpCtx.drawImage(sigCanvas, 0, 0, 400, 120);
   const sigDataURL = tmpCanvas.toDataURL('image/jpeg', 0.5);
   const payload = {
-    'access_key': '3a24cd08-4f08-41d8-8587-7da66c367e39',
     'Naam deelnemer': document.getElementById('naam').value,
     'Leeftijd': document.getElementById('leeftijd').value,
     'Datum': document.getElementById('datum').value,
@@ -366,31 +367,21 @@ async function submitForm(e) {
     'Toestemming audio-opname': document.getElementById('cb2').checked ? 'Ja ✓' : 'Nee',
     'Begrepen: naam niet in scriptie': document.getElementById('cb3').checked ? 'Ja ✓' : 'Nee',
     'Toestemming gebruik antwoorden': document.getElementById('cb4').checked ? 'Ja ✓' : 'Nee',
-    '_subject': 'Toestemmingsformulier ingevuld – ' + document.getElementById('naam').value,
   };
 
   try {
-    const res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      document.getElementById('consent-form').style.display = 'none';
-      document.getElementById('sending-overlay').classList.remove('active');
-      const banner = document.getElementById('success-banner');
-      banner.style.display = 'block';
-      banner.scrollIntoView({ behavior: 'smooth' });
-      document.getElementById('progress-fill').style.width = '100%';
-      document.getElementById('progress-label').textContent = 'Voortgang: 100% – Verzonden ✓';
-    } else {
-      throw new Error(data.message || 'Server error');
-    }
+    await emailjs.send('service_li5dpwo', 'template_ngxsrt8', payload);
+    document.getElementById('consent-form').style.display = 'none';
+    document.getElementById('sending-overlay').classList.remove('active');
+    const banner = document.getElementById('success-banner');
+    banner.style.display = 'block';
+    banner.scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('progress-fill').style.width = '100%';
+    document.getElementById('progress-label').textContent = 'Voortgang: 100% – Verzonden ✓';
   } catch(err) {
     document.getElementById('sending-overlay').classList.remove('active');
     document.getElementById('btn-submit').disabled = false;
-    alert('Fout bij verzenden: ' + err.message);
+    alert('Fout bij verzenden: ' + JSON.stringify(err));
   }
 }
 document.getElementById('consent-form').addEventListener('submit', submitForm);
